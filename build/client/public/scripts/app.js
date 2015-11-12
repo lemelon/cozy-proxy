@@ -6,19 +6,19 @@
 
   var modules = {};
   var cache = {};
-  var has = ({}).hasOwnProperty;
-
   var aliases = {};
+  var has = ({}).hasOwnProperty;
 
   var endsWith = function(str, suffix) {
     return str.indexOf(suffix, str.length - suffix.length) !== -1;
   };
 
+  var _cmp = 'components/';
   var unalias = function(alias, loaderPath) {
     var start = 0;
     if (loaderPath) {
-      if (loaderPath.indexOf('components/' === 0)) {
-        start = 'components/'.length;
+      if (loaderPath.indexOf(_cmp) === 0) {
+        start = _cmp.length;
       }
       if (loaderPath.indexOf('/', start) > 0) {
         loaderPath = loaderPath.substring(start, loaderPath.indexOf('/', start));
@@ -26,33 +26,32 @@
     }
     var result = aliases[alias + '/index.js'] || aliases[loaderPath + '/deps/' + alias + '/index.js'];
     if (result) {
-      return 'components/' + result.substring(0, result.length - '.js'.length);
+      return _cmp + result.substring(0, result.length - '.js'.length);
     }
     return alias;
   };
 
-  var expand = (function() {
-    var reg = /^\.\.?(\/|$)/;
-    return function(root, name) {
-      var results = [], parts, part;
-      parts = (reg.test(name) ? root + '/' + name : name).split('/');
-      for (var i = 0, length = parts.length; i < length; i++) {
-        part = parts[i];
-        if (part === '..') {
-          results.pop();
-        } else if (part !== '.' && part !== '') {
-          results.push(part);
-        }
+  var _reg = /^\.\.?(\/|$)/;
+  var expand = function(root, name) {
+    var results = [], part;
+    var parts = (_reg.test(name) ? root + '/' + name : name).split('/');
+    for (var i = 0, length = parts.length; i < length; i++) {
+      part = parts[i];
+      if (part === '..') {
+        results.pop();
+      } else if (part !== '.' && part !== '') {
+        results.push(part);
       }
-      return results.join('/');
-    };
-  })();
+    }
+    return results.join('/');
+  };
+
   var dirname = function(path) {
     return path.split('/').slice(0, -1).join('/');
   };
 
   var localRequire = function(path) {
-    return function(name) {
+    return function expanded(name) {
       var absolute = expand(dirname(path), name);
       return globals.require(absolute, path);
     };
@@ -107,6 +106,7 @@
   };
 
   require.brunch = true;
+  require._cache = cache;
   globals.require = require;
 })();
 require.register("application", function(exports, require, module) {
@@ -366,8 +366,8 @@ module.exports = {
     "email smtp login tip": "Leave empty to use the same username as for the imap server",
     "email smtp password": "smtp password",
     "email smtp password tip": "Leave empty to use the same password as for the imap server",
-    "login welcome": "Welcome",
-    "login enter your password": "Please enter your password to access to your Cozy:",
+    "login welcome": "Welcome %{username}",
+    "login enter your password": "Please enter your password to access to your Cozy",
     "login password": "password",
     "login submit": "sign in",
     "login auth success": "Authentication successful, let's go in!",
@@ -380,7 +380,7 @@ module.exports = {
     "login wrong password title": "Wrong password",
     "login wrong password message": "The pasword you entered is incorrect, please try again",
     "reset welcome": "Reset password",
-    "reset enter your password": "Please enter your new password to reset it",
+    "reset enter your password": "%{username}, please enter your new password to reset your access",
     "reset password": "password",
     "reset submit": "reset your password",
     "reset auth success": "password successfully resetted",
@@ -392,7 +392,8 @@ module.exports = {
     "setup on mobile message": "Check out our mobile app on Google Play:",
     "welcome title": "Congratulations on taking back control of your personal data.",
     "welcome message": "With Cozy, you can store your data on your personal Cloud that you control. As opposed to most commercial Cloud services, there is no data-mining taking place on your Cozy Cloud, so no large corporation is trying to learn everything from you by searching through your data."
-};
+}
+;
 });
 
 require.register("locales/en", function(exports, require, module) {
@@ -446,8 +447,8 @@ module.exports = {
   "email smtp login tip": "Leave empty to use the same username as for the imap server",
   "email smtp password": "smtp password",
   "email smtp password tip": "Leave empty to use the same password as for the imap server",
-  "login welcome": "Welcome",
-  "login enter your password": "Please enter your password to access to your Cozy:",
+  "login welcome": "Welcome %{username}",
+  "login enter your password": "Please enter your password to access to your Cozy",
   "login password": "password",
   "login submit": "sign in",
   "login auth success": "Authentication successful, let's go in!",
@@ -460,7 +461,7 @@ module.exports = {
   "login wrong password title": "Wrong password",
   "login wrong password message": "The pasword you entered is incorrect, please try again",
   "reset welcome": "Reset password",
-  "reset enter your password": "Please enter your new password to reset it",
+  "reset enter your password": "%{username}, please enter your new password to reset your access",
   "reset password": "password",
   "reset submit": "reset your password",
   "reset auth success": "password successfully resetted",
@@ -527,8 +528,8 @@ module.exports = {
     "email smtp login tip": "Dejar vacío si quiere utilizar el mismo usuario del servidor imap",
     "email smtp password": "contraseña smtp",
     "email smtp password tip": "Dejar vacio si quiere utilizar la misma contraseña del servidor imap",
-    "login welcome": "Bienvenid@",
-    "login enter your password": "Introducir su contraseña para acceder a su Cozy:",
+    "login welcome": "Bienvenido %{username}",
+    "login enter your password": "Introducir su contraseña para acceder a su Cozy",
     "login password": "contraseña",
     "login submit": "iniciar sesión",
     "login auth success": "Autenticación exitosa, ¡ adelante !",
@@ -541,7 +542,7 @@ module.exports = {
     "login wrong password title": "Contraseña incorrecta",
     "login wrong password message": "La contraseña que usted ha entrado es incorrecta, por favor vuelva a ensayar",
     "reset welcome": "Restauración de lacontraseña",
-    "reset enter your password": "Por favor, introduzca su nueva contraseña para restaurarla",
+    "reset enter your password": "%{username}, por favor, introduzca su nueva contraseña para restaurarla",
     "reset password": "contraseña",
     "reset submit": "restaurar su contraseña",
     "reset auth success": "contraseña restaurada",
@@ -553,7 +554,8 @@ module.exports = {
     "setup on mobile message": "Descargar la app mobile Cozy en Google Play:",
     "welcome title": "¡Felicitaciones! Usted acaba de tomar el control de sus datos.",
     "welcome message": "Con Cozy, usted puede almacenar sus datos en un Cloud personal que usted controla, lo que permite proteger la intimidad de su vida numérica. Efectivamente, ¡la empresa Cozy Cloud no explota los datos que usted coloca en su Cloud!"
-};
+}
+;
 });
 
 require.register("locales/fr", function(exports, require, module) {
@@ -607,8 +609,8 @@ module.exports = {
     "email smtp login tip": "Laisser vide pour utiliser le même nom d'utilisateur que pour le serveur imap",
     "email smtp password": "mot de passe smtp",
     "email smtp password tip": "Laisser vide pour utiliser le même mot de passe que pour le serveur imap",
-    "login welcome": "Bienvenue",
-    "login enter your password": "Entrez votre mot de passe pour accéder à votre Cozy :",
+    "login welcome": "Bienvenue %{username}",
+    "login enter your password": "Entrez votre mot de passe pour accéder à votre Cozy",
     "login password": "mot de passe",
     "login submit": "s'authentifier",
     "login auth success": "Authentification réussie, entrons !",
@@ -621,7 +623,7 @@ module.exports = {
     "login wrong password title": "Mot de passe erroné",
     "login wrong password message": "Le mot de passe que vous avez saisi n'est pas correct, veuillez réessayer.",
     "reset welcome": "Restauration du mot de passe",
-    "reset enter your password": "Entrez un nouveau mot de passe pour le restaurer",
+    "reset enter your password": "%{username}, entrez un nouveau mot de passe pour restaurer votre accès",
     "reset password": "mot de passe",
     "reset submit": "restaurer votre mot de passe",
     "reset auth success": "mot de passe restauré",
@@ -633,7 +635,8 @@ module.exports = {
     "setup on mobile message": "Téléchargez l'app mobile Cozy sur Google Play :",
     "welcome title": "Félicitations ! Vous venez de reprendre le contrôle de vos données.",
     "welcome message": "Avec Cozy, vous pouvez stocker vos données dans votre Cloud personnel, que vous contrôlez, ce qui protège l'intimité de votre vie numérique. En effet, la société Cozy Cloud n'exploite pas les données que vous placez dans votre Cloud !"
-};
+}
+;
 });
 
 require.register("locales/ko", function(exports, require, module) {
@@ -687,7 +690,7 @@ module.exports = {
     "email smtp login tip": "IMAP 서버의 사용자 명과 같으면, 빈칸으로 남겨 두세요",
     "email smtp password": "SMTP 비밀번호",
     "email smtp password tip": "IMAP 서버의 비밀번호와 같으면, 빈칸으로 남겨 두세요",
-    "login welcome": "환영합니다.",
+    "login welcome": "환영합니다. %{username}",
     "login enter your password": "비밀 번호를 입력하세요",
     "login password": "비밀번호",
     "login submit": "로그인",
@@ -713,7 +716,8 @@ module.exports = {
     "setup on mobile message": "구글 플레이에서 모바일 앱 설치:",
     "welcome title": "축하 합니다. 설정이 완료 되었습니다.",
     "welcome message": "Cozy 클라우드와 즐거운 시작이 되세요."
-};
+}
+;
 });
 
 require.register("routes/index", function(exports, require, module) {
@@ -979,30 +983,30 @@ module.exports = Registration = (function(_super) {
   - nocontrols: hide the flow controls
    */
 
-  Registration.prototype.steps = {
-    preset: {
-      next: 'import',
-      nextLabel: 'sign up'
-    },
-    "import": {
-      next: 'email',
-      nextLabel: 'skip'
-    },
-    import_google: {
-      nocontrols: true
-    },
-    email: {
-      next: 'setup',
-      nextLabel: 'skip'
-    },
-    setup: {
-      next: 'welcome',
-      nocontrols: true
-    },
-    welcome: {
-      nextLabel: 'welcome'
-    }
-  };
+  Registration.prototype.steps = (function() {
+    var hasGoogleImport;
+    hasGoogleImport = __indexOf.call(require('env').apps, 'import-from-google') >= 0;
+    return {
+      preset: {
+        next: hasGoogleImport ? 'import' : 'setup',
+        nextLabel: 'sign up'
+      },
+      "import": {
+        next: 'setup',
+        nextLabel: 'skip'
+      },
+      import_google: {
+        nocontrols: true
+      },
+      setup: {
+        next: 'welcome',
+        nocontrols: true
+      },
+      welcome: {
+        nextLabel: 'welcome'
+      }
+    };
+  })();
 
   Registration.prototype.initialize = function() {
     this.errors = new Bacon.Bus();
@@ -1082,7 +1086,7 @@ module.exports = Registration = (function(_super) {
     })(this)).onValue(function(path) {
       var loc;
       loc = window.location;
-      return window.location.href = "" + loc.protocol + "//" + loc.host + next;
+      return window.location.href = "" + loc.protocol + "//" + loc.host + path;
     });
     return this.add('nextControl', nextControl);
   };
@@ -1318,7 +1322,7 @@ module.exports = AuthView = (function(_super) {
 
   AuthView.prototype.serializeData = function() {
     return {
-      username: window.username,
+      username: require('env').username,
       prefix: this.options.type
     };
   };
@@ -1580,141 +1584,6 @@ module.exports = RegisterControlsView = (function(_super) {
   return RegisterControlsView;
 
 })(Mn.ItemView);
-});
-
-;require.register("views/register/email", function(exports, require, module) {
-
-/*
-Email account setting view
-
-A view that contains a setup form for a primary email adress.
- */
-var FormView, RegisterEmailView,
-  __hasProp = {}.hasOwnProperty,
-  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-FormView = require('views/lib/form_view');
-
-module.exports = RegisterEmailView = (function(_super) {
-  __extends(RegisterEmailView, _super);
-
-  function RegisterEmailView() {
-    return RegisterEmailView.__super__.constructor.apply(this, arguments);
-  }
-
-  RegisterEmailView.prototype.className = 'email';
-
-  RegisterEmailView.prototype.template = require('views/templates/view_register_email');
-
-
-  /*
-  Initialize internal streams
-   */
-
-  RegisterEmailView.prototype.initialize = function() {
-    this.ui.legend = '.advanced legend';
-    this.ui.adv = '.advanced .content';
-    this.ui.ssl = 'input[type=checkbox][aria-controls]';
-    this.showAdv = this.$el.asEventStream('click', this.ui.legend).scan(false, function(visible) {
-      return !visible;
-    });
-    return this.sslCheck = this.$el.asEventStream('change', this.ui.ssl).map('.target');
-  };
-
-
-  /*
-  Assign reactive actions
-   */
-
-  RegisterEmailView.prototype.onRender = function() {
-    var _ref;
-    this.showAdv.not().assign(this.ui.adv, 'attr', 'aria-hidden');
-    this.showAdv.assign(this.ui.legend, 'attr', 'aria-hidden');
-    if ((_ref = this.model.get('email')) != null) {
-      _ref.assign(this.ui.inputs.filter('#email-email'), 'val');
-    }
-    this.initSSLCheckboxes();
-    this.bindSMTPServer();
-    this.initForm();
-    this.model.setEmail.plug(this.form.filter((function(_this) {
-      return function() {
-        return _this.model.get('step').map(function(cur) {
-          return cur === 'email' || cur === 'setup';
-        });
-      };
-    })(this)));
-    return this.model.nextLabel.plug(this.required.map(function(bool) {
-      if (bool) {
-        return 'add email';
-      } else {
-        return 'skip';
-      }
-    }));
-  };
-
-
-  /*
-  Initialize the SSL checkboxes
-  
-  When clicking on a checkbox that controls an ssl-port input, then change
-  this input value to pre-fill a right value, depending of the service and the
-  state of the SSL checkbox.
-   */
-
-  RegisterEmailView.prototype.initSSLCheckboxes = function() {
-    return this.ui.ssl.each((function(_this) {
-      return function(indexs, el) {
-        var control, service;
-        service = el.id.match(/email-([a-z]{4})-ssl/i)[1];
-        control = _this.$("#" + (el.getAttribute('aria-controls')));
-        return _this.sslCheck.filter(function(target) {
-          return target === el;
-        }).map(function(target) {
-          var ssl;
-          ssl = target.checked;
-          switch (service) {
-            case 'imap':
-              if (ssl) {
-                return 993;
-              } else {
-                return 143;
-              }
-            case 'smtp':
-              if (ssl) {
-                return 465;
-              } else {
-                return 25;
-              }
-          }
-        }).assign(control, 'val');
-      };
-    })(this));
-  };
-
-
-  /*
-  Initialize smtp server input logic
-  
-  When fill the imap-server input, if the smtp-server input is empty or was
-  never edited, then is takes the same value as the imap-server input. If it
-  contains a custom value, it doesn't change.
-   */
-
-  RegisterEmailView.prototype.bindSMTPServer = function() {
-    var imapServer, smtpServer;
-    imapServer = this.ui.inputs.filter('#email-imap-server');
-    smtpServer = this.ui.inputs.filter('#email-smtp-server');
-    smtpServer.asEventStream('keyup').map(function(e) {
-      return !!e.target.value.length;
-    }).assign(smtpServer, 'data', 'edited');
-    return imapServer.asEventStream('keyup').map('.target.value').filter(function() {
-      return smtpServer.data('edited');
-    }).assign(smtpServer, 'val');
-  };
-
-  return RegisterEmailView;
-
-})(FormView);
 });
 
 ;require.register("views/register/feedback", function(exports, require, module) {
@@ -2225,7 +2094,7 @@ var buf = [];
 var jade_mixins = {};
 var jade_interp;
 var locals_ = (locals || {}),prefix = locals_.prefix,username = locals_.username;
-buf.push("<div role=\"region\"><h1>" + (jade.escape((jade_interp = t(prefix + ' welcome')) == null ? '' : jade_interp)) + " " + (jade.escape((jade_interp = username) == null ? '' : jade_interp)) + "</h1><p id=\"login-password-tip\" class=\"help\">" + (jade.escape(null == (jade_interp = t(prefix + ' enter your password')) ? "" : jade_interp)) + "</p><label" + (jade.attr("for", "" + (prefix) + "-password", true, false)) + (jade.attr("aria-describedby", "" + (prefix) + "-password-tip", true, false)) + " class=\"with-input\"><span>" + (jade.escape(null == (jade_interp = t(prefix + ' password')) ? "" : jade_interp)) + "</span><input" + (jade.attr("id", "" + (prefix) + "-password", true, false)) + " name=\"password\" type=\"password\" autofocus=\"autofocus\"/></label></div><footer><div class=\"controls\"><button type=\"submit\" class=\"btn btn-primary\">" + (jade.escape(null == (jade_interp = t(prefix + ' submit')) ? "" : jade_interp)) + "</button></div><div class=\"feedback\"></div></footer>");;return buf.join("");
+buf.push("<div role=\"region\"><h1>" + (jade.escape(null == (jade_interp = t(prefix + ' welcome', {username: username})) ? "" : jade_interp)) + "</h1><p id=\"login-password-tip\" class=\"help\">" + (jade.escape(null == (jade_interp = t(prefix + ' enter your password', {username: username})) ? "" : jade_interp)) + "</p><label" + (jade.attr("for", "" + (prefix) + "-password", true, false)) + (jade.attr("aria-describedby", "" + (prefix) + "-password-tip", true, false)) + " class=\"with-input\"><span>" + (jade.escape(null == (jade_interp = t(prefix + ' password')) ? "" : jade_interp)) + "</span><input" + (jade.attr("id", "" + (prefix) + "-password", true, false)) + " name=\"password\" type=\"password\" autofocus=\"autofocus\"/></label></div><footer><div class=\"controls\"><button type=\"submit\" class=\"btn btn-primary\">" + (jade.escape(null == (jade_interp = t(prefix + ' submit')) ? "" : jade_interp)) + "</button></div><div class=\"feedback\"></div></footer>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
@@ -2292,25 +2161,6 @@ var jade_mixins = {};
 var jade_interp;
 
 buf.push("<a href=\"/register?step=null\" class=\"btn btn-primary\">" + (jade.escape(null == (jade_interp = t('next')) ? "" : jade_interp)) + "</a>");;return buf.join("");
-};
-if (typeof define === 'function' && define.amd) {
-  define([], function() {
-    return __templateData;
-  });
-} else if (typeof module === 'object' && module && module.exports) {
-  module.exports = __templateData;
-} else {
-  __templateData;
-}
-});
-
-;require.register("views/templates/view_register_email", function(exports, require, module) {
-var __templateData = function template(locals) {
-var buf = [];
-var jade_mixins = {};
-var jade_interp;
-
-buf.push("<h2>" + (jade.escape(null == (jade_interp = t('email caption')) ? "" : jade_interp)) + "</h2><label for=\"email-email\" class=\"with-input\"><span>" + (jade.escape(null == (jade_interp = t('email email')) ? "" : jade_interp)) + "</span><input id=\"email-email\" type=\"email\" name=\"email\" required=\"required\"/></label><label for=\"email-password\" class=\"with-input\"><span>" + (jade.escape(null == (jade_interp = t('email password')) ? "" : jade_interp)) + "</span><input id=\"email-password\" type=\"password\" name=\"password\" required=\"required\"/></label><div class=\"input-group input-group-02-third\"><label for=\"email-imap-server\" class=\"with-input\"><span>" + (jade.escape(null == (jade_interp = t('email imap server')) ? "" : jade_interp)) + "</span><input id=\"email-imap-server\" type=\"text\" name=\"imap-server\" required=\"required\"/></label><label for=\"email-imap-port\" class=\"with-input\"><span>" + (jade.escape(null == (jade_interp = t('email imap port')) ? "" : jade_interp)) + "</span><input id=\"email-imap-port\" type=\"number\" name=\"imap-port\" required=\"required\" value=\"993\"/></label></div><label for=\"email-imap-ssl\" class=\"checkbox\"><input id=\"email-imap-ssl\" type=\"checkbox\" name=\"imap-ssl\" checked=\"checked\" aria-controls=\"email-imap-port\"/><span>" + (jade.escape(null == (jade_interp = t('email imap ssl')) ? "" : jade_interp)) + "</span></label><fieldset class=\"advanced\"><legend>" + (jade.escape(null == (jade_interp = t('email show advanced')) ? "" : jade_interp)) + "</legend><div class=\"content\"><label for=\"email-imap-login\" aria-describedby=\"email-imap-login-tip\" class=\"with-input\"><span>" + (jade.escape(null == (jade_interp = t('email imap login')) ? "" : jade_interp)) + "</span><input id=\"email-imap-login\" type=\"text\" name=\"imap-login\"/></label><p id=\"email-login-tip\" class=\"tips\">" + (jade.escape(null == (jade_interp = t('email imap login tip')) ? "" : jade_interp)) + "</p><hr/><div class=\"input-group input-group-02-third\"><label for=\"email-smtp-server\" class=\"with-input\"><span>" + (jade.escape(null == (jade_interp = t('email smtp server')) ? "" : jade_interp)) + "</span><input id=\"email-smtp-server\" type=\"text\" name=\"smtp-server\"/></label><label for=\"email-smtp-port\" class=\"with-input\"><span>" + (jade.escape(null == (jade_interp = t('email smtp port')) ? "" : jade_interp)) + "</span><input id=\"email-smtp-port\" type=\"number\" name=\"smtp-port\" value=\"465\"/></label></div><label for=\"email-smtp-ssl\" class=\"checkbox\"><input id=\"email-smtp-ssl\" type=\"checkbox\" name=\"smtp-ssl\" checked=\"checked\" aria-controls=\"email-smtp-port\"/><span>" + (jade.escape(null == (jade_interp = t('email smtp ssl')) ? "" : jade_interp)) + "</span></label><label for=\"email-smtp-login\" aria-describedby=\"email-smtp-login-tip\" class=\"with-input\"><span>" + (jade.escape(null == (jade_interp = t('email smtp login')) ? "" : jade_interp)) + "</span><input id=\"email-smtp-login\" type=\"email\" name=\"smtp-login\"/></label><p id=\"email-login-tip\" class=\"tips\">" + (jade.escape(null == (jade_interp = t('email smtp login tip')) ? "" : jade_interp)) + "</p><label for=\"email-smtp-password\" aria-describedby=\"email-smtp-password-tip\" class=\"with-input\"><span>" + (jade.escape(null == (jade_interp = t('email smtp password')) ? "" : jade_interp)) + "</span><input id=\"email-password\" type=\"password\" name=\"smtp-password\"/></label><p id=\"email-login-tip\" class=\"tips\">" + (jade.escape(null == (jade_interp = t('email smtp password tip')) ? "" : jade_interp)) + "</p></div></fieldset><p id=\"email-email-tip\" class=\"tips\">" + (jade.escape(null == (jade_interp = t('email email tip')) ? "" : jade_interp)) + "</p>");;return buf.join("");
 };
 if (typeof define === 'function' && define.amd) {
   define([], function() {
