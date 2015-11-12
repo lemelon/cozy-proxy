@@ -134,7 +134,6 @@ commonJSJade = ->
 
 # convert JSON lang files to JS
 buildJsInLocales = ->
-    path = require 'path'
     # client files
     for file in fs.readdirSync './client/app/locales/'
         filename = './client/app/locales/' + file

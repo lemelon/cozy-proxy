@@ -2,6 +2,7 @@ Client = require('request-json').JsonClient
 logger = require('printit')
     date: false
     prefix: 'lib:app_manager'
+fs = require 'fs'
 
 class AppManager
 
@@ -25,7 +26,10 @@ class AppManager
             when 'installing'
                 callback code: 404, msg: 'app is still installing'
             when 'installed'
-                callback null, routes[slug].port
+                if routes[slug].type is 'static'
+                    callback null, routes[slug]
+                else
+                    callback null, routes[slug]
             when 'stopped'
                 if shouldStart and not @isStarting[slug]?
                     @isStarting[slug] = true
@@ -58,6 +62,14 @@ class AppManager
                     port: data.app.port
                     state: data.app.state
                 callback null, data.app.port
+
+    # readfile to start a static app
+    startStaticApp: (appName, url, path, callback) ->
+        logger.info "Starting static app #{appName}"
+        url += 'index.html' if url is '/' or url is '/public/'
+        fs.readFile path + url, 'utf8', (err, content) ->
+            if err? callback err
+            else callback null, content
 
     versions: (callback) ->
         @client.get "api/applications/stack", (error, res, apps) ->
