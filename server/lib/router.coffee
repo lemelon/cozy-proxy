@@ -31,9 +31,9 @@ class Router
                 logger.error "Cannot retrieve applications list."
                 logger.error util.inspect(error) or apps.msg
                 return callback error or apps.msg
-
             try
                 for app in apps.rows
+                    console.log app
                     @routes[app.slug] = {}
                     # add path to be able to read the static file
                     if app.type is 'static'
@@ -47,5 +47,32 @@ class Router
             catch err
                 logger.error "Oops, something went wrong during routes reset."
                 callback err
+
+    startStatic: (id, callback) ->
+        console.log 'start static'
+        console.log id
+        logger.info 'Start resetting routes...'
+        @routes = {}
+        @client.get "api/applications/", (error, res, apps) =>
+            if error? or apps.error?
+                logger.error "Cannot retrieve applications list."
+                logger.error util.inspect(error) or apps.msg
+                return callback error or apps.msg
+            try
+                for app in apps.rows
+                    console.log app
+                    @routes[app.slug] = {}
+                    # add path to be able to read the static file
+                    if app.type is 'static' and id is app.id
+                        console.log 'app name'
+                        res.redirect "apps/#{app.name}/*"
+                    @routes[app.slug].state = app.state if app.state?
+                logger.info "Routes have been successfully reset."
+                callback()
+            catch err
+                logger.error "Oops, something went wrong during routes reset."
+                callback err
+
+
 
 module.exports = new Router()

@@ -14,6 +14,8 @@ module.exports =
     'routes': get: index.showRoutes
     'routes/reset': get: index.resetRoutes
 
+    'routes/start/:id': get: index.start
+
     'register':
         get: auth.registerIndex
         post: [auth.register, utils.authenticate]
