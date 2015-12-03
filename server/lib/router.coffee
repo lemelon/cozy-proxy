@@ -39,6 +39,7 @@ class Router
                     if app.type is 'static'
                         @routes[app.slug].type = app.type
                         @routes[app.slug].path = app.path
+                        @routes[app.slug].token = app.token
                     else
                         @routes[app.slug].port = app.port if app.port?
                     @routes[app.slug].state = app.state if app.state?
@@ -63,7 +64,7 @@ class Router
                     console.log app
                     @routes[app.slug] = {}
                     # add path to be able to read the static file
-                    if app.type is 'static' and id is app.id
+                    if app.type is 'static'
                         console.log 'app name'
                         res.redirect "apps/#{app.name}/*"
                     @routes[app.slug].state = app.state if app.state?

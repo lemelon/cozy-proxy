@@ -3,6 +3,7 @@ qs = require 'querystring'
 
 localization = require '../lib/localization_manager'
 passwordKeys = require '../lib/password_keys'
+url = require 'url'
 
 # customize passport authenticate
 module.exports.authenticate = (req, res, next) ->
@@ -29,10 +30,13 @@ module.exports.authenticate = (req, res, next) ->
     passport.authenticate('local', process)(req, res, next)
 
 module.exports.isAuthenticated = (req, res, next) ->
-    if req.isAuthenticated()
+    console.log 'test authentification'
+    if req.isAuthenticated() or req.query.token?
         next()
     else
         url = "/login"
         url += "?next=#{req.url}" unless req.url is '/'
         url += "&#{qs.stringify req.query}" if req.query.length
         res.redirect url
+
+
