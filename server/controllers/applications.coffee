@@ -9,21 +9,14 @@ logger = require('printit')
 # get path to start a static app
 getPathForStaticApp = (appName, path, root, callback) ->
     logger.info "Starting static app #{appName}"
-
     path += 'index.html' if path is '/' or path is '/public/'
     callback lockedpath(root).join path
 
 module.exports.app = (req, res, next) ->
-    console.log 'APPLICATION OPEN'
-    console.log req.params
     appName = req.params.name
     req.url = req.url.substring "/apps/#{appName}".length
-    console.log req.url
     shouldStart = -1 is req.url.indexOf 'socket.io'
-    console.log 'ensureStarted'
     appManager.ensureStarted appName, shouldStart, (err, result) ->
-        console.log 'ensure started result'
-        console.log result
         if err?
             error = new Error err.msg
             error.status = err.code
@@ -31,20 +24,17 @@ module.exports.app = (req, res, next) ->
                 name: if err.code is 404 then 'not_found' else 'error_app'
             next error
         else if result.type is 'static'
-            console.log result.type
-            if req.query.token is result.token
-                req.url = '/'
-                req.isAuthenticated() = true
-                return res.redirect "/apps/#{appName}/*"
-            # else
-            #     error = new Error 'Not authorized to access static app'
-            #     error.status = 401
-            #     next error
+            if result.token
+                if req.query.token?
+                    req.url = '/'
+                    token = req.query.token.slice(0, -1);
+                if token isnt result.token
+                    error = new Error 'Not authorized to access static app'
+                    error.status = 401
+                    next error
+            
             # showing private static app
             getPathForStaticApp appName, req.url, result.path, (url) ->
-                console.log '///////////////'
-                console.log url
-                console.log '//////////////////'
                 send(req, url).pipe res
         else
             getProxy().web req, res, target: "http://localhost:#{result.port}"
