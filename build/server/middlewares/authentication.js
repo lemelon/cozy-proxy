@@ -47,7 +47,8 @@ module.exports.authenticate = function(req, res, next) {
 };
 
 module.exports.isAuthenticated = function(req, res, next) {
-  if (req.isAuthenticated()) {
+  console.log('test authentification');
+  if (req.isAuthenticated() || (req.query.token != null)) {
     return next();
   } else {
     url = "/login";

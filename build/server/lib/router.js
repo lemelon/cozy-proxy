@@ -80,44 +80,6 @@ Router = (function() {
     })(this));
   };
 
-  Router.prototype.startStatic = function(id, callback) {
-    console.log('start static');
-    console.log(id);
-    logger.info('Start resetting routes...');
-    this.routes = {};
-    return this.client.get("api/applications/", (function(_this) {
-      return function(error, res, apps) {
-        var app, err, error1, i, len, ref;
-        if ((error != null) || (apps.error != null)) {
-          logger.error("Cannot retrieve applications list.");
-          logger.error(util.inspect(error) || apps.msg);
-          return callback(error || apps.msg);
-        }
-        try {
-          ref = apps.rows;
-          for (i = 0, len = ref.length; i < len; i++) {
-            app = ref[i];
-            console.log(app);
-            _this.routes[app.slug] = {};
-            if (app.type === 'static') {
-              console.log('app name');
-              res.redirect("apps/" + app.name + "/*");
-            }
-            if (app.state != null) {
-              _this.routes[app.slug].state = app.state;
-            }
-          }
-          logger.info("Routes have been successfully reset.");
-          return callback();
-        } catch (error1) {
-          err = error1;
-          logger.error("Oops, something went wrong during routes reset.");
-          return callback(err);
-        }
-      };
-    })(this));
-  };
-
   return Router;
 
 })();

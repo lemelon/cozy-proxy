@@ -72,6 +72,31 @@ AppManager = (function() {
     }
   };
 
+  AppManager.prototype.startApp = function(slug, callback) {
+    logger.info("Starting app " + slug);
+    return this.client.post("api/applications/" + slug + "/start", {}, (function(_this) {
+      return function(err, res, data) {
+        var msg, routes;
+        if (data.error) {
+          err = err || data.msg;
+        }
+        if ((err != null) || res.statusCode !== 200) {
+          msg = "An error occurred while starting the app " + slug;
+          logger.error(msg + " -- " + err);
+          return callback(err);
+        } else {
+          logger.info("App " + slug + " successfully started.");
+          routes = _this.router.getRoutes();
+          routes[slug] = {
+            port: data.app.port,
+            state: data.app.state
+          };
+          return callback(null, data.app.port);
+        }
+      };
+    })(this));
+  };
+
   AppManager.prototype.versions = function(callback) {
     return this.client.get("api/applications/stack", function(error, res, apps) {
       if (error != null) {
