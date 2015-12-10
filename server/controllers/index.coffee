@@ -15,15 +15,6 @@ module.exports.resetRoutes = (req, res) ->
         else
             res.send 200, success: true
 
-module.exports.start = (req, res) ->
-    console.log '_________________________START_________________________'
-    console.log req.params
-    router.startStatic req.params.id, (error) ->
-        if error?
-            next new Error error
-        else
-            res.send 200, success: true
-
 module.exports.status = (req, res) ->
     statusChecker.checkAllStatus (err, status) ->
         if err then next new Error err

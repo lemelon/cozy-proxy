@@ -3,12 +3,9 @@ staticFile = require 'node-static'
 {getProxy} = require '../lib/proxy'
 send = require 'send'
 lockedpath = require 'lockedpath'
-fs = require 'fs'
 logger = require('printit')
     date: false
     prefix: 'controllers:applications'
-
-
 
 # get path to start a static app
 getPathForStaticApp = (appName, path, root, callback) ->
