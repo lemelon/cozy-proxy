@@ -154,4 +154,5 @@ private route (with params)", (done) ->
 
         it "should have called home to start the app", ->
             expected = "/api/applications/front/start"
+            console.log @scope
             @scope.isDone().should.be.true

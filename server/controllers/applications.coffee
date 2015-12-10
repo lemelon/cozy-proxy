@@ -1,10 +1,14 @@
 appManager = require '../lib/app_manager'
+staticFile = require 'node-static'
 {getProxy} = require '../lib/proxy'
 send = require 'send'
 lockedpath = require 'lockedpath'
+fs = require 'fs'
 logger = require('printit')
     date: false
     prefix: 'controllers:applications'
+
+
 
 # get path to start a static app
 getPathForStaticApp = (appName, path, root, callback) ->
@@ -35,7 +39,8 @@ module.exports.app = (req, res, next) ->
             
             # showing private static app
             getPathForStaticApp appName, req.url, result.path, (url) ->
-                send(req, url).pipe res
+                file = new staticFile.Server url
+                file.serve req, res
         else
             getProxy().web req, res, target: "http://localhost:#{result.port}"
 
@@ -54,7 +59,8 @@ module.exports.publicApp = (req, res, next) ->
         else if result.type is 'static'
             # showing public static app
             getPathForStaticApp appName, req.url, result.path, (url) ->
-                send(req, url).pipe res
+                file = new staticFile.Server url
+                file.serve req, res
         else
             getProxy().web req, res, target: "http://localhost:#{result.port}"
 

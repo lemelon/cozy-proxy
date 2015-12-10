@@ -31,6 +31,20 @@ module.exports.resetRoutes = function(req, res) {
   });
 };
 
+module.exports.start = function(req, res) {
+  console.log('_________________________START_________________________');
+  console.log(req.params);
+  return router.startStatic(req.params.id, function(error) {
+    if (error != null) {
+      return next(new Error(error));
+    } else {
+      return res.send(200, {
+        success: true
+      });
+    }
+  });
+};
+
 module.exports.status = function(req, res) {
   return statusChecker.checkAllStatus(function(err, status) {
     if (err) {
